@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Polo Ralph Lauren - Fitting Guide Demo</title>
+    <style>
+      :root {
+        --silhouette-image-x: 5%;
+        --silhouette-image-y: -18%;
+        --silhouette-image-scale: 0.88;
+        --silhouette-indicators-right: 66.8%;
+        --silhouette-indicators-top: 34%;
+        --silhouette-line-classic-width: 43px;
+        --silhouette-line-classic-height: 265px;
+        --silhouette-line-classic-top: 0px;
+        --silhouette-line-custom-width: 34px;
+        --silhouette-line-custom-height: 250px;
+        --silhouette-line-custom-top: 15px;
+        --silhouette-line-slim-width: 26px;
+        --silhouette-line-slim-height: 235px;
+        --silhouette-line-slim-top: 30px;
+        --length-image-x: 27%;
+        --length-image-y: -52%;
+        --length-image-scale: 1.2;
+        --length-indicators-right: 0;
+        --length-indicators-bottom: 24%;
+        --length-line-width: 220px;
+        --length-line-classic-top: 32px;
+        --length-line-custom-top: 16px;
+        --length-line-slim-top: 0;
+        --sleeve-image-x: 38%;
+        --sleeve-image-y: 0%;
+        --sleeve-image-scale: 1.5;
+        --sleeve-indicators-right: 54%;
+        --sleeve-indicators-top: 65%;
+        --sleeve-line-width: 140px;
+        --sleeve-line-slim-top: 0px;
+        --sleeve-line-custom-top: 17.5px;
+        --sleeve-line-classic-top: 35px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .rl-ccs-container {
+        width: 720px;
+        margin: 0 auto;
+        color: rgb(4, 30, 58);
+        font-family: sans-serif;
+      }
+
+      .fit-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        margin-bottom: 15px;
+        margin-top: 30px;
+      }
+
+      .fit-tab {
+        padding: 9px 0;
+        min-width: 124px;
+        text-align: center;
+        border: 1px solid #d0d0d0;
+        background: white;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 400;
+        color: #2c2c2c;
+        transition: all 0.3s ease;
+      }
+
+      .fit-tab:first-child {
+        border-radius: 12px 0 0 12px;
+      }
+
+      .fit-tab:last-child {
+        border-radius: 0 12px 12px 0;
+      }
+
+      .fit-tab.active {
+        background: #f2f3f5;
+        color: #2c2c2c;
+        border-color: #041e3a;
+        font-weight: 600;
+      }
+
+      .fit-tab:hover:not(.active) {
+        background: #f5f5f5;
+      }
+
+      .fit-description {
+        text-align: center;
+        color: #041e3a;
+        width: 310px;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0 auto 20px;
+        min-height: 40px;
+      }
+
+      .fit-description strong {
+        color: #333;
+      }
+
+      .content-area {
+        display: flex;
+        background: #f0eeed;
+        height: 515px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .text-panel {
+        flex: 0 0 38%;
+        padding: 60px 10px 280px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .attribute-content {
+        position: relative;
+        min-height: 100px;
+        text-align: center;
+      }
+
+      .attribute-item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        transform: translateY(15px);
+        transition:
+          opacity 0.4s ease,
+          transform 0.4s ease;
+        width: 100%;
+        pointer-events: none;
+      }
+
+      .attribute-item.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .attribute-title {
+        font-size: 36px;
+        font-weight: 400;
+        margin-bottom: 12px;
+        font-family: serif;
+      }
+
+      .attribute-description {
+        font-size: 14px;
+        color: #6d6f73;
+        line-height: 1.5;
+      }
+
+      .attribute-selector {
+        display: flex;
+        gap: 35px;
+        padding-top: 20px;
+      }
+
+      .attribute-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .radio-circle {
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid #888;
+        background: #fff;
+        border-radius: 50%;
+        position: relative;
+        transition: border-color 0.3s ease;
+      }
+
+      .radio-circle::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 8px;
+        height: 8px;
+        background: #6d6f73;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .attribute-option.active .radio-circle {
+        border-color: #6d6f73;
+      }
+
+      .attribute-option.active .radio-circle::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .attribute-label {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        color: #474747;
+        text-transform: uppercase;
+      }
+
+      .image-panel {
+        flex: 0 0 62%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .image-wrapper {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .polo-image {
+        position: absolute;
+        height: 160%;
+        width: auto;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        transition: none;
+      }
+
+      .image-wrapper.silhouette {
+        transform: translate(
+            var(--silhouette-image-x),
+            var(--silhouette-image-y)
+          )
+          scale(var(--silhouette-image-scale));
+      }
+
+      .image-wrapper.length {
+        transform: translate(var(--length-image-x), var(--length-image-y))
+          scale(var(--length-image-scale));
+      }
+
+      .image-wrapper.sleeve {
+        transform: translate(var(--sleeve-image-x), var(--sleeve-image-y))
+          scale(var(--sleeve-image-scale));
+      }
+
+      .image-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .image-container.active {
+        opacity: 1;
+      }
+
+      .fit-indicators {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 10;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .fit-indicators.silhouette-pos {
+        right: var(--silhouette-indicators-right);
+        top: var(--silhouette-indicators-top);
+      }
+
+      .fit-indicators.length-pos {
+        right: var(--length-indicators-right);
+        bottom: var(--length-indicators-bottom);
+      }
+
+      .fit-indicators.sleeve-pos {
+        right: var(--sleeve-indicators-right);
+        top: var(--sleeve-indicators-top);
+      }
+
+      .fit-line {
+        position: absolute;
+        transition: all 0.3s ease;
+      }
+
+      .fit-line-label {
+        width: 0;
+        position: absolute;
+        font-size: 10px;
+        color: #fff;
+        white-space: nowrap;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        right: -10px;
+        top: -6px;
+      }
+
+      .fit-indicators.length-pos .fit-line-label {
+        right: auto;
+        left: -55px;
+        text-align: right;
+      }
+
+      .fit-indicators.silhouette-pos .fit-line {
+        border-top: 1px dashed rgba(255, 255, 255, 0.7);
+        border-left: 1px dashed rgba(255, 255, 255, 0.7);
+        right: 0;
+      }
+
+      .fit-indicators.silhouette-pos .fit-line.active {
+        border-top: 1.5px solid rgba(255, 255, 255, 1);
+        border-left: 1.5px solid rgba(255, 255, 255, 1);
+      }
+
+      .fit-indicators.silhouette-pos .fit-line.classic {
+        width: var(--silhouette-line-classic-width);
+        height: var(--silhouette-line-classic-height);
+        top: var(--silhouette-line-classic-top);
+      }
+
+      .fit-indicators.silhouette-pos .fit-line.custom {
+        width: var(--silhouette-line-custom-width);
+        height: var(--silhouette-line-custom-height);
+        top: var(--silhouette-line-custom-top);
+      }
+
+      .fit-indicators.silhouette-pos .fit-line.slim {
+        width: var(--silhouette-line-slim-width);
+        height: var(--silhouette-line-slim-height);
+        top: var(--silhouette-line-slim-top);
+      }
+
+      .fit-indicators.length-pos .fit-line {
+        width: var(--length-line-width);
+        height: 0;
+        border-top: 1px dashed rgba(255, 255, 255, 0.7);
+        right: 0;
+      }
+
+      .fit-indicators.length-pos .fit-line.active {
+        border-top: 2px solid rgba(255, 255, 255, 1);
+      }
+
+      .fit-indicators.length-pos .fit-line.classic {
+        top: var(--length-line-classic-top);
+      }
+
+      .fit-indicators.length-pos .fit-line.custom {
+        top: var(--length-line-custom-top);
+      }
+
+      .fit-indicators.length-pos .fit-line.slim {
+        top: var(--length-line-slim-top);
+      }
+
+      .fit-indicators.sleeve-pos .fit-line {
+        width: var(--sleeve-line-width);
+        height: 0;
+        border-top: 1px dashed rgba(255, 255, 255, 0.7);
+        right: 0;
+      }
+
+      .fit-indicators.sleeve-pos .fit-line.active {
+        border-top: 1.5px solid rgba(255, 255, 255, 1);
+      }
+
+      .fit-indicators.sleeve-pos .fit-line.slim {
+        top: var(--sleeve-line-slim-top);
+      }
+
+      .fit-indicators.sleeve-pos .fit-line.custom {
+        top: var(--sleeve-line-custom-top);
+      }
+
+      .fit-indicators.sleeve-pos .fit-line.classic {
+        top: var(--sleeve-line-classic-top);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rl-ccs-container">
+      <div class="fit-tabs">
+        <div class="fit-tab active" data-fit="classic">Classic</div>
+        <div class="fit-tab" data-fit="custom">Custom Slim</div>
+        <div class="fit-tab" data-fit="slim">Slim</div>
+      </div>
+
+      <div class="fit-description">
+        <span id="fitDescText"
+          >Classic Fit: Our roomiest silhouette is cut with a fuller body, a
+          lower armhole, and a longer sleeve.</span
+        >
+      </div>
+
+      <div class="content-area">
+        <div class="text-panel">
+          <div class="attribute-content">
+            <div class="attribute-item active" data-attribute="silhouette">
+              <h2 class="attribute-title">Silhouette</h2>
+              <p class="attribute-description" id="silhouetteDesc">
+                A relaxed fit that has room to move
+              </p>
+            </div>
+            <div class="attribute-item" data-attribute="length">
+              <h2 class="attribute-title">Length</h2>
+              <p class="attribute-description" id="lengthDesc">
+                The slightly longer body is great for tucking in—or hanging
+                loose
+              </p>
+            </div>
+            <div class="attribute-item" data-attribute="sleeve">
+              <h2 class="attribute-title">Sleeve</h2>
+              <p class="attribute-description" id="sleeveDesc">
+                A fuller cut that covers most of the bicep and falls close to
+                the elbow
+              </p>
+            </div>
+          </div>
+
+          <div class="attribute-selector">
+            <div class="attribute-option active" data-attribute="silhouette">
+              <div class="radio-circle"></div>
+              <span class="attribute-label">Silhouette</span>
+            </div>
+            <div class="attribute-option" data-attribute="length">
+              <div class="radio-circle"></div>
+              <span class="attribute-label">Length</span>
+            </div>
+            <div class="attribute-option" data-attribute="sleeve">
+              <div class="radio-circle"></div>
+              <span class="attribute-label">Sleeve</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="image-panel">
+          <div class="image-container active" data-fit="classic">
+            <div class="image-wrapper silhouette">
+              <img
+                src="classic.png"
+                class="polo-image"
+                alt="Classic Fit Polo"
+              />
+            </div>
+          </div>
+
+          <div class="image-container" data-fit="custom">
+            <div class="image-wrapper silhouette">
+              <img
+                src="custom_slim.png"
+                class="polo-image"
+                alt="Custom Slim Fit Polo"
+              />
+            </div>
+          </div>
+
+          <div class="image-container" data-fit="slim">
+            <div class="image-wrapper silhouette">
+              <img src="slim.png" class="polo-image" alt="Slim Fit Polo" />
+            </div>
+          </div>
+
+          <div class="fit-indicators silhouette-pos" id="fitIndicators">
+            <div class="fit-line classic active">
+              <span class="fit-line-label">Classic</span>
+            </div>
+            <div class="fit-line custom">
+              <span class="fit-line-label">Custom</span>
+            </div>
+            <div class="fit-line slim">
+              <span class="fit-line-label">Slim</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const fitData = {
+        classic: {
+          description:
+            "Classic Fit: Our roomiest silhouette is cut with a fuller body, a lower armhole, and a longer sleeve.",
+          silhouette: "A relaxed fit that has room to move",
+          length:
+            "The slightly longer body is great for tucking in—or hanging loose",
+          sleeve:
+            "A fuller cut that covers most of the bicep and falls close to the elbow",
+        },
+        custom: {
+          description:
+            "Custom Slim Fit: The perfect middle ground. It has a trim waist and sleeve but is still relaxed through the body.",
+          silhouette:
+            "The lightly tailored fit balances modern taste with timeless style",
+          length:
+            "Tucked in or out, this moderately cut body always looks polished",
+          sleeve: "A medium-length, with a slightly trim arm opening",
+        },
+        slim: {
+          description:
+            "Slim Fit: Our trimmest silhouette is fitted through the chest and the waist with a sleeve that hugs the bicep.",
+          silhouette: "Cut close to the body for a slim and modern look",
+          length: "The slightly shorter length is ideal for wearing untucked",
+          sleeve:
+            "The higher armhole and shorter length hug the bicep. An ideal cut for accentuating your arms",
+        },
+      };
+
+      let currentFit = "classic";
+      let currentAttribute = "silhouette";
+
+      const fitTabs = document.querySelectorAll(".fit-tab");
+      const fitDescText = document.getElementById("fitDescText");
+      const attributeItems = document.querySelectorAll(".attribute-item");
+      const attributeOptions = document.querySelectorAll(".attribute-option");
+      const fitIndicators = document.getElementById("fitIndicators");
+      const fitLines = document.querySelectorAll(".fit-line");
+      const imageContainers = document.querySelectorAll(".image-container");
+      const imageWrappers = document.querySelectorAll(".image-wrapper");
+
+      function updateFitDescription() {
+        fitDescText.innerHTML = fitData[currentFit].description;
+      }
+
+      function updateAttributeDescriptions() {
+        document.getElementById("silhouetteDesc").textContent =
+          fitData[currentFit].silhouette;
+        document.getElementById("lengthDesc").textContent =
+          fitData[currentFit].length;
+        document.getElementById("sleeveDesc").textContent =
+          fitData[currentFit].sleeve;
+      }
+
+      function updateFitLineIndicator() {
+        fitLines.forEach((line) => {
+          line.classList.remove("active");
+          if (line.classList.contains(currentFit)) {
+            line.classList.add("active");
+          }
+        });
+      }
+
+      function updateFitImage() {
+        imageContainers.forEach((container) => {
+          container.classList.remove("active");
+          if (container.dataset.fit === currentFit) {
+            container.classList.add("active");
+          }
+        });
+      }
+
+      function updateImageZoom() {
+        imageWrappers.forEach((wrapper) => {
+          wrapper.classList.remove("silhouette", "length", "sleeve");
+          wrapper.classList.add(currentAttribute);
+        });
+      }
+
+      function updateIndicatorPosition() {
+        fitIndicators.classList.remove(
+          "silhouette-pos",
+          "length-pos",
+          "sleeve-pos",
+        );
+        fitIndicators.classList.add(`${currentAttribute}-pos`);
+      }
+
+      fitTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          fitTabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          currentFit = tab.dataset.fit;
+          updateFitDescription();
+          updateAttributeDescriptions();
+          updateFitLineIndicator();
+          updateFitImage();
+        });
+      });
+
+      attributeOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+          attributeOptions.forEach((o) => o.classList.remove("active"));
+          option.classList.add("active");
+          const attribute = option.dataset.attribute;
+          currentAttribute = attribute;
+
+          attributeItems.forEach((item) => {
+            item.classList.remove("active");
+            if (item.dataset.attribute === attribute) {
+              item.classList.add("active");
+            }
+          });
+
+          updateImageZoom();
+          updateIndicatorPosition();
+        });
+      });
+
+      updateFitDescription();
+      updateAttributeDescriptions();
+      updateFitLineIndicator();
+      updateFitImage();
+      updateImageZoom();
+    </script>
+  </body>
+</html>
