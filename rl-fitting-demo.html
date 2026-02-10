@@ -47,7 +47,9 @@
       }
 
       .rl-ccs-container {
-        width: 720px;
+        width: 100%;
+        max-width: 720px;
+        min-width: 400px;
         margin: 0 auto;
         color: rgb(4, 30, 58);
         font-family: "Founders Grotesk Text Regular", Arial, Helvetica, sans-serif;
@@ -107,8 +109,11 @@
         color: #333;
       }
 
+      .visual-section {
+        position: relative;
+      }
+
       .content-area {
-        display: flex;
         background: #f0eeed;
         height: 515px;
         position: relative;
@@ -116,17 +121,30 @@
       }
 
       .text-panel {
-        flex: 0 0 38%;
-        padding: 60px 10px 280px 50px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        padding: 160px 10px 40px 30px;
+        pointer-events: none;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
+      }
+
+      .text-panel .attribute-selector {
+        pointer-events: auto;
       }
 
       .attribute-content {
-        position: relative;
+        position: absolute;
+        top: 60px;
+        left: 30px;
+        z-index: 10;
         min-height: 100px;
-        text-align: center;
+        text-align: left;
+        width: 250px;
       }
 
       .attribute-item {
@@ -214,9 +232,18 @@
       }
 
       .image-panel {
-        flex: 0 0 62%;
+        width: 100%;
+        height: 100%;
         position: relative;
         overflow: hidden;
+      }
+
+      .image-area-inner {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 446px;
       }
 
       .image-wrapper {
@@ -388,6 +415,164 @@
       .fit-indicators.sleeve-pos .fit-line.classic {
         top: var(--sleeve-line-classic-top);
       }
+
+      /* ---- Progressive size breakpoints (JS-driven via ResizeObserver) ---- */
+      /*
+        Default (>650px):  horizontal buttons, title overlaid on left
+        md (<=650px):      vertical buttons, title below, image-area 85%
+        sm (<=560px):      image-area 80%, tighter tabs
+        xs (<=480px):      image-area 75%, tightest spacing
+      */
+
+      /* Medium: <= 650px — switch to vertical buttons, title below */
+      .rl-ccs-container.rl-size-md .fit-tab {
+        min-width: 110px;
+      }
+      .rl-ccs-container.rl-size-md .fit-description {
+        width: auto;
+        padding: 0 20px;
+      }
+      .rl-ccs-container.rl-size-md .image-area-inner {
+        right: -10%;
+      }
+      .rl-ccs-container.rl-size-md .text-panel {
+        padding: 40px 10px 40px 15px;
+        width: 40%;
+        justify-content: space-around;
+      }
+      .rl-ccs-container.rl-size-md .attribute-selector {
+        flex-direction: column;
+        gap: 0;
+        justify-content: space-around;
+        height: 100%;
+        padding-top: 0;
+      }
+      .rl-ccs-container.rl-size-md .attribute-content {
+        position: static;
+        text-align: center;
+        width: auto;
+        left: auto;
+        top: auto;
+        padding: 30px 20px 20px;
+      }
+      .rl-ccs-container.rl-size-md .attribute-item {
+        position: relative;
+        display: none;
+      }
+      .rl-ccs-container.rl-size-md .attribute-item.active {
+        display: block;
+        opacity: 1;
+        transform: none;
+      }
+      .rl-ccs-container.rl-size-md .attribute-title {
+        font-size: 28px;
+      }
+      .rl-ccs-container.rl-size-md .attribute-description {
+        font-size: 13px;
+      }
+
+      /* Small: <= 560px — tighten image area */
+      .rl-ccs-container.rl-size-sm .fit-tab {
+        min-width: 100px;
+        font-size: 9px;
+      }
+      .rl-ccs-container.rl-size-sm .fit-description {
+        width: auto;
+        padding: 0 20px;
+        font-size: 11px;
+      }
+      .rl-ccs-container.rl-size-sm .image-area-inner {
+        right: -15%;
+      }
+      .rl-ccs-container.rl-size-sm .text-panel {
+        padding: 40px 10px 40px 15px;
+        width: 25%;
+        justify-content: space-around;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-selector {
+        flex-direction: column;
+        gap: 0;
+        justify-content: space-around;
+        height: 100%;
+        padding-top: 0;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-content {
+        position: static;
+        text-align: center;
+        width: auto;
+        left: auto;
+        top: auto;
+        padding: 30px 20px 20px;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-item {
+        position: relative;
+        display: none;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-item.active {
+        display: block;
+        opacity: 1;
+        transform: none;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-title {
+        font-size: 28px;
+      }
+      .rl-ccs-container.rl-size-sm .attribute-description {
+        font-size: 13px;
+      }
+
+      /* Extra small: <= 480px — tightest */
+      .rl-ccs-container.rl-size-xs .fit-tabs {
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+      .rl-ccs-container.rl-size-xs .fit-tab {
+        min-width: 90px;
+        font-size: 9px;
+      }
+      .rl-ccs-container.rl-size-xs .fit-description {
+        width: auto;
+        padding: 0 15px;
+        font-size: 11px;
+        margin-bottom: 15px;
+      }
+      .rl-ccs-container.rl-size-xs .image-area-inner {
+        right: -20%;
+      }
+      .rl-ccs-container.rl-size-xs .text-panel {
+        padding: 40px 10px 40px 0;
+        width: 27%;
+        justify-content: space-around;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-selector {
+        flex-direction: column;
+        gap: 0;
+        justify-content: space-around;
+        height: 100%;
+        padding-top: 0;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-content {
+        position: static;
+        text-align: center;
+        width: auto;
+        left: auto;
+        top: auto;
+        padding: 25px 15px 15px;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-item {
+        position: relative;
+        display: none;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-item.active {
+        display: block;
+        opacity: 1;
+        transform: none;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-title {
+        font-size: 24px;
+      }
+      .rl-ccs-container.rl-size-xs .attribute-description {
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>
@@ -405,84 +590,88 @@
         >
       </div>
 
-      <div class="content-area">
-        <div class="text-panel">
-          <div class="attribute-content">
-            <div class="attribute-item active" data-attribute="silhouette">
-              <h2 class="attribute-title">Silhouette</h2>
-              <p class="attribute-description" id="silhouetteDesc">
-                A relaxed fit that has room to move
-              </p>
-            </div>
-            <div class="attribute-item" data-attribute="length">
-              <h2 class="attribute-title">Length</h2>
-              <p class="attribute-description" id="lengthDesc">
-                The slightly longer body is great for tucking in—or hanging
-                loose
-              </p>
-            </div>
-            <div class="attribute-item" data-attribute="sleeve">
-              <h2 class="attribute-title">Sleeve</h2>
-              <p class="attribute-description" id="sleeveDesc">
-                A fuller cut that covers most of the bicep and falls close to
-                the elbow
-              </p>
+      <div class="visual-section">
+        <div class="content-area">
+          <div class="text-panel">
+            <div class="attribute-selector">
+              <div class="attribute-option active" data-attribute="silhouette">
+                <div class="radio-circle"></div>
+                <span class="attribute-label">Silhouette</span>
+              </div>
+              <div class="attribute-option" data-attribute="length">
+                <div class="radio-circle"></div>
+                <span class="attribute-label">Length</span>
+              </div>
+              <div class="attribute-option" data-attribute="sleeve">
+                <div class="radio-circle"></div>
+                <span class="attribute-label">Sleeve</span>
+              </div>
             </div>
           </div>
 
-          <div class="attribute-selector">
-            <div class="attribute-option active" data-attribute="silhouette">
-              <div class="radio-circle"></div>
-              <span class="attribute-label">Silhouette</span>
-            </div>
-            <div class="attribute-option" data-attribute="length">
-              <div class="radio-circle"></div>
-              <span class="attribute-label">Length</span>
-            </div>
-            <div class="attribute-option" data-attribute="sleeve">
-              <div class="radio-circle"></div>
-              <span class="attribute-label">Sleeve</span>
+          <div class="image-panel">
+            <div class="image-area-inner">
+              <div class="image-container active" data-fit="classic">
+                <div class="image-wrapper silhouette">
+                  <img
+                    src="classic.png"
+                    class="polo-image"
+                    alt="Classic Fit Polo"
+                  />
+                </div>
+              </div>
+
+              <div class="image-container" data-fit="custom">
+                <div class="image-wrapper silhouette">
+                  <img
+                    src="custom_slim.png"
+                    class="polo-image"
+                    alt="Custom Slim Fit Polo"
+                  />
+                </div>
+              </div>
+
+              <div class="image-container" data-fit="slim">
+                <div class="image-wrapper silhouette">
+                  <img src="slim.png" class="polo-image" alt="Slim Fit Polo" />
+                </div>
+              </div>
+
+              <div class="fit-indicators silhouette-pos" id="fitIndicators">
+                <div class="fit-line classic active">
+                  <span class="fit-line-label">Classic</span>
+                </div>
+                <div class="fit-line custom">
+                  <span class="fit-line-label">Custom</span>
+                </div>
+                <div class="fit-line slim">
+                  <span class="fit-line-label">Slim</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="image-panel">
-          <div class="image-container active" data-fit="classic">
-            <div class="image-wrapper silhouette">
-              <img
-                src="classic.png"
-                class="polo-image"
-                alt="Classic Fit Polo"
-              />
-            </div>
+        <div class="attribute-content">
+          <div class="attribute-item active" data-attribute="silhouette">
+            <h2 class="attribute-title">Silhouette</h2>
+            <p class="attribute-description" id="silhouetteDesc">
+              A relaxed fit that has room to move
+            </p>
           </div>
-
-          <div class="image-container" data-fit="custom">
-            <div class="image-wrapper silhouette">
-              <img
-                src="custom_slim.png"
-                class="polo-image"
-                alt="Custom Slim Fit Polo"
-              />
-            </div>
+          <div class="attribute-item" data-attribute="length">
+            <h2 class="attribute-title">Length</h2>
+            <p class="attribute-description" id="lengthDesc">
+              The slightly longer body is great for tucking in—or hanging
+              loose
+            </p>
           </div>
-
-          <div class="image-container" data-fit="slim">
-            <div class="image-wrapper silhouette">
-              <img src="slim.png" class="polo-image" alt="Slim Fit Polo" />
-            </div>
-          </div>
-
-          <div class="fit-indicators silhouette-pos" id="fitIndicators">
-            <div class="fit-line classic active">
-              <span class="fit-line-label">Classic</span>
-            </div>
-            <div class="fit-line custom">
-              <span class="fit-line-label">Custom</span>
-            </div>
-            <div class="fit-line slim">
-              <span class="fit-line-label">Slim</span>
-            </div>
+          <div class="attribute-item" data-attribute="sleeve">
+            <h2 class="attribute-title">Sleeve</h2>
+            <p class="attribute-description" id="sleeveDesc">
+              A fuller cut that covers most of the bicep and falls close to
+              the elbow
+            </p>
           </div>
         </div>
       </div>
@@ -613,6 +802,28 @@
       updateFitLineIndicator();
       updateFitImage();
       updateImageZoom();
+
+      // ---- Responsive size classes via ResizeObserver ----
+      const container = document.querySelector(".rl-ccs-container");
+      const sizeClasses = ["rl-size-md", "rl-size-sm", "rl-size-xs"];
+
+      function updateSizeClass(width) {
+        container.classList.remove(...sizeClasses);
+        if (width <= 480) {
+          container.classList.add("rl-size-xs");
+        } else if (width <= 560) {
+          container.classList.add("rl-size-sm");
+        } else if (width <= 650) {
+          container.classList.add("rl-size-md");
+        }
+      }
+
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          updateSizeClass(entry.contentRect.width);
+        }
+      });
+      ro.observe(container);
     </script>
   </body>
 </html>
