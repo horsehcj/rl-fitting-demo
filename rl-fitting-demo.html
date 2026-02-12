@@ -40,7 +40,10 @@
         --sleeve-line-classic-top: 35px;
       }
 
-      * {
+      .rl-ccs-container,
+      .rl-ccs-container *,
+      .rl-ccs-container *::before,
+      .rl-ccs-container *::after {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -584,7 +587,7 @@
       </div>
 
       <div class="fit-description">
-        <span id="fitDescText"
+        <span
           >Classic Fit: Our roomiest silhouette is cut with a fuller body, a
           lower armhole, and a longer sleeve.</span
         >
@@ -637,7 +640,7 @@
                 </div>
               </div>
 
-              <div class="fit-indicators silhouette-pos" id="fitIndicators">
+              <div class="fit-indicators silhouette-pos">
                 <div class="fit-line classic active">
                   <span class="fit-line-label">Classic</span>
                 </div>
@@ -655,20 +658,20 @@
         <div class="attribute-content">
           <div class="attribute-item active" data-attribute="silhouette">
             <h2 class="attribute-title">Silhouette</h2>
-            <p class="attribute-description" id="silhouetteDesc">
+            <p class="attribute-description">
               A relaxed fit that has room to move
             </p>
           </div>
           <div class="attribute-item" data-attribute="length">
             <h2 class="attribute-title">Length</h2>
-            <p class="attribute-description" id="lengthDesc">
+            <p class="attribute-description">
               The slightly longer body is great for tucking in—or hanging
               loose
             </p>
           </div>
           <div class="attribute-item" data-attribute="sleeve">
             <h2 class="attribute-title">Sleeve</h2>
-            <p class="attribute-description" id="sleeveDesc">
+            <p class="attribute-description">
               A fuller cut that covers most of the bicep and falls close to
               the elbow
             </p>
@@ -678,152 +681,286 @@
     </div>
 
     <script>
-      const fitData = {
-        classic: {
-          description:
-            "Classic Fit: Our roomiest silhouette is cut with a fuller body, a lower armhole, and a longer sleeve.",
-          silhouette: "A relaxed fit that has room to move",
-          length:
-            "The slightly longer body is great for tucking in—or hanging loose",
-          sleeve:
-            "A fuller cut that covers most of the bicep and falls close to the elbow",
-        },
-        custom: {
-          description:
-            "Custom Slim Fit: The perfect middle ground. It has a trim waist and sleeve but is still relaxed through the body.",
-          silhouette:
-            "The lightly tailored fit balances modern taste with timeless style",
-          length:
-            "Tucked in or out, this moderately cut body always looks polished",
-          sleeve: "A medium-length, with a slightly trim arm opening",
-        },
-        slim: {
-          description:
-            "Slim Fit: Our trimmest silhouette is fitted through the chest and the waist with a sleeve that hugs the bicep.",
-          silhouette: "Cut close to the body for a slim and modern look",
-          length: "The slightly shorter length is ideal for wearing untucked",
-          sleeve:
-            "The higher armhole and shorter length hug the bicep. An ideal cut for accentuating your arms",
-        },
-      };
+      (function () {
+        "use strict";
 
-      let currentFit = "classic";
-      let currentAttribute = "silhouette";
+        var fitData = {
+          classic: {
+            description:
+              "Classic Fit: Our roomiest silhouette is cut with a fuller body, a lower armhole, and a longer sleeve.",
+            silhouette: "A relaxed fit that has room to move",
+            length:
+              "The slightly longer body is great for tucking in—or hanging loose",
+            sleeve:
+              "A fuller cut that covers most of the bicep and falls close to the elbow",
+          },
+          custom: {
+            description:
+              "Custom Slim Fit: The perfect middle ground. It has a trim waist and sleeve but is still relaxed through the body.",
+            silhouette:
+              "The lightly tailored fit balances modern taste with timeless style",
+            length:
+              "Tucked in or out, this moderately cut body always looks polished",
+            sleeve: "A medium-length, with a slightly trim arm opening",
+          },
+          slim: {
+            description:
+              "Slim Fit: Our trimmest silhouette is fitted through the chest and the waist with a sleeve that hugs the bicep.",
+            silhouette: "Cut close to the body for a slim and modern look",
+            length:
+              "The slightly shorter length is ideal for wearing untucked",
+            sleeve:
+              "The higher armhole and shorter length hug the bicep. An ideal cut for accentuating your arms",
+          },
+        };
 
-      const fitTabs = document.querySelectorAll(".fit-tab");
-      const fitDescText = document.getElementById("fitDescText");
-      const attributeItems = document.querySelectorAll(".attribute-item");
-      const attributeOptions = document.querySelectorAll(".attribute-option");
-      const fitIndicators = document.getElementById("fitIndicators");
-      const fitLines = document.querySelectorAll(".fit-line");
-      const imageContainers = document.querySelectorAll(".image-container");
-      const imageWrappers = document.querySelectorAll(".image-wrapper");
+        // Track active instances for cleanup
+        var activeInstances = new Map();
 
-      function updateFitDescription() {
-        fitDescText.innerHTML = fitData[currentFit].description;
-      }
+        function initRLFitGuide(root) {
+          // Resolve the container element
+          var container =
+            root.matches && root.matches(".rl-ccs-container")
+              ? root
+              : root.querySelector(".rl-ccs-container");
+          if (!container) return null;
 
-      function updateAttributeDescriptions() {
-        document.getElementById("silhouetteDesc").textContent =
-          fitData[currentFit].silhouette;
-        document.getElementById("lengthDesc").textContent =
-          fitData[currentFit].length;
-        document.getElementById("sleeveDesc").textContent =
-          fitData[currentFit].sleeve;
-      }
-
-      function updateFitLineIndicator() {
-        fitLines.forEach((line) => {
-          line.classList.remove("active");
-          if (line.classList.contains(currentFit)) {
-            line.classList.add("active");
+          // If previously initialized, clean up first
+          if (activeInstances.has(container)) {
+            activeInstances.get(container)();
+            activeInstances.delete(container);
           }
-        });
-      }
 
-      function updateFitImage() {
-        imageContainers.forEach((container) => {
-          container.classList.remove("active");
-          if (container.dataset.fit === currentFit) {
-            container.classList.add("active");
+          // Local state per instance
+          var currentFit = "classic";
+          var currentAttribute = "silhouette";
+
+          // Scoped DOM queries — no document.getElementById
+          var fitTabs = container.querySelectorAll(".fit-tab");
+          var fitDescText = container.querySelector(".fit-description span");
+          var attributeItems = container.querySelectorAll(".attribute-item");
+          var attributeOptions =
+            container.querySelectorAll(".attribute-option");
+          var fitIndicators = container.querySelector(".fit-indicators");
+          var fitLines = container.querySelectorAll(".fit-line");
+          var imageContainers = container.querySelectorAll(".image-container");
+          var imageWrappers = container.querySelectorAll(".image-wrapper");
+
+          // Bail if key elements are missing
+          if (!fitDescText || !fitIndicators || fitTabs.length === 0)
+            return null;
+
+          // --- Update functions (scoped to this instance) ---
+          function updateFitDescription() {
+            fitDescText.innerHTML = fitData[currentFit].description;
           }
-        });
-      }
 
-      function updateImageZoom() {
-        imageWrappers.forEach((wrapper) => {
-          wrapper.classList.remove("silhouette", "length", "sleeve");
-          wrapper.classList.add(currentAttribute);
-        });
-      }
+          function updateAttributeDescriptions() {
+            var silhouetteDesc = container.querySelector(
+              '[data-attribute="silhouette"] .attribute-description',
+            );
+            var lengthDesc = container.querySelector(
+              '[data-attribute="length"] .attribute-description',
+            );
+            var sleeveDesc = container.querySelector(
+              '[data-attribute="sleeve"] .attribute-description',
+            );
+            if (silhouetteDesc)
+              silhouetteDesc.textContent = fitData[currentFit].silhouette;
+            if (lengthDesc)
+              lengthDesc.textContent = fitData[currentFit].length;
+            if (sleeveDesc)
+              sleeveDesc.textContent = fitData[currentFit].sleeve;
+          }
 
-      function updateIndicatorPosition() {
-        fitIndicators.classList.remove(
-          "silhouette-pos",
-          "length-pos",
-          "sleeve-pos",
-        );
-        fitIndicators.classList.add(`${currentAttribute}-pos`);
-      }
+          function updateFitLineIndicator() {
+            fitLines.forEach(function (line) {
+              line.classList.remove("active");
+              if (line.classList.contains(currentFit)) {
+                line.classList.add("active");
+              }
+            });
+          }
 
-      fitTabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          fitTabs.forEach((t) => t.classList.remove("active"));
-          tab.classList.add("active");
-          currentFit = tab.dataset.fit;
+          function updateFitImage() {
+            imageContainers.forEach(function (c) {
+              c.classList.remove("active");
+              if (c.dataset.fit === currentFit) {
+                c.classList.add("active");
+              }
+            });
+          }
+
+          function updateImageZoom() {
+            imageWrappers.forEach(function (wrapper) {
+              wrapper.classList.remove("silhouette", "length", "sleeve");
+              wrapper.classList.add(currentAttribute);
+            });
+          }
+
+          function updateIndicatorPosition() {
+            fitIndicators.classList.remove(
+              "silhouette-pos",
+              "length-pos",
+              "sleeve-pos",
+            );
+            fitIndicators.classList.add(currentAttribute + "-pos");
+          }
+
+          // --- Event listeners (store refs for cleanup) ---
+          var tabHandlers = [];
+          fitTabs.forEach(function (tab) {
+            var handler = function () {
+              fitTabs.forEach(function (t) {
+                t.classList.remove("active");
+              });
+              tab.classList.add("active");
+              currentFit = tab.dataset.fit;
+              updateFitDescription();
+              updateAttributeDescriptions();
+              updateFitLineIndicator();
+              updateFitImage();
+            };
+            tab.addEventListener("click", handler);
+            tabHandlers.push({ element: tab, handler: handler });
+          });
+
+          var attrHandlers = [];
+          attributeOptions.forEach(function (option) {
+            var handler = function () {
+              attributeOptions.forEach(function (o) {
+                o.classList.remove("active");
+              });
+              option.classList.add("active");
+              currentAttribute = option.dataset.attribute;
+
+              attributeItems.forEach(function (item) {
+                item.classList.remove("active");
+                if (item.dataset.attribute === currentAttribute) {
+                  item.classList.add("active");
+                }
+              });
+
+              updateImageZoom();
+              updateIndicatorPosition();
+            };
+            option.addEventListener("click", handler);
+            attrHandlers.push({ element: option, handler: handler });
+          });
+
+          // --- Initial state (includes updateIndicatorPosition fix) ---
           updateFitDescription();
           updateAttributeDescriptions();
           updateFitLineIndicator();
           updateFitImage();
-        });
-      });
-
-      attributeOptions.forEach((option) => {
-        option.addEventListener("click", () => {
-          attributeOptions.forEach((o) => o.classList.remove("active"));
-          option.classList.add("active");
-          const attribute = option.dataset.attribute;
-          currentAttribute = attribute;
-
-          attributeItems.forEach((item) => {
-            item.classList.remove("active");
-            if (item.dataset.attribute === attribute) {
-              item.classList.add("active");
-            }
-          });
-
           updateImageZoom();
           updateIndicatorPosition();
+
+          // --- ResizeObserver (scoped to this container) ---
+          function updateSizeClass(width) {
+            container.classList.remove("rl-size-md", "rl-size-sm", "rl-size-xs");
+            if (width <= 480) {
+              container.classList.add("rl-size-xs");
+            } else if (width <= 560) {
+              container.classList.add("rl-size-sm");
+            } else if (width <= 650) {
+              container.classList.add("rl-size-md");
+            }
+          }
+
+          var ro = new ResizeObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) {
+              updateSizeClass(entries[i].contentRect.width);
+            }
+          });
+          ro.observe(container);
+
+          // Trigger initial size class
+          updateSizeClass(container.offsetWidth);
+
+          // --- Cleanup function ---
+          function cleanup() {
+            tabHandlers.forEach(function (h) {
+              h.element.removeEventListener("click", h.handler);
+            });
+            attrHandlers.forEach(function (h) {
+              h.element.removeEventListener("click", h.handler);
+            });
+            ro.disconnect();
+          }
+
+          activeInstances.set(container, cleanup);
+          return cleanup;
+        }
+
+        // --- MutationObserver: auto-detect clones added/removed ---
+        function findContainers(node) {
+          var containers = [];
+          if (node.nodeType !== 1) return containers;
+          if (node.matches && node.matches(".rl-ccs-container")) {
+            containers.push(node);
+          }
+          if (node.querySelectorAll) {
+            var found = node.querySelectorAll(".rl-ccs-container");
+            for (var k = 0; k < found.length; k++) {
+              containers.push(found[k]);
+            }
+          }
+          return containers;
+        }
+
+        var domObserver = new MutationObserver(function (mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            // Handle added nodes
+            var added = mutations[i].addedNodes;
+            for (var j = 0; j < added.length; j++) {
+              var addedContainers = findContainers(added[j]);
+              for (var a = 0; a < addedContainers.length; a++) {
+                var c = addedContainers[a];
+                // Only init if visible (not the hidden original)
+                if (c.offsetParent !== null || getComputedStyle(c).display !== "none") {
+                  initRLFitGuide(c);
+                }
+              }
+            }
+
+            // Handle removed nodes — cleanup
+            var removed = mutations[i].removedNodes;
+            for (var r = 0; r < removed.length; r++) {
+              var removedContainers = findContainers(removed[r]);
+              for (var rc = 0; rc < removedContainers.length; rc++) {
+                var rem = removedContainers[rc];
+                if (activeInstances.has(rem)) {
+                  activeInstances.get(rem)();
+                  activeInstances.delete(rem);
+                }
+              }
+            }
+          }
         });
-      });
 
-      updateFitDescription();
-      updateAttributeDescriptions();
-      updateFitLineIndicator();
-      updateFitImage();
-      updateImageZoom();
-
-      // ---- Responsive size classes via ResizeObserver ----
-      const container = document.querySelector(".rl-ccs-container");
-      const sizeClasses = ["rl-size-md", "rl-size-sm", "rl-size-xs"];
-
-      function updateSizeClass(width) {
-        container.classList.remove(...sizeClasses);
-        if (width <= 480) {
-          container.classList.add("rl-size-xs");
-        } else if (width <= 560) {
-          container.classList.add("rl-size-sm");
-        } else if (width <= 650) {
-          container.classList.add("rl-size-md");
+        function startObserving() {
+          domObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+          });
         }
-      }
 
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          updateSizeClass(entry.contentRect.width);
+        if (document.body) {
+          startObserving();
+        } else {
+          document.addEventListener("DOMContentLoaded", startObserving);
         }
-      });
-      ro.observe(container);
+
+        // --- Standalone fallback: init if not inside Monetate wrapper ---
+        var standalone = document.querySelector(".rl-ccs-container");
+        if (standalone && !standalone.closest(".mt-shirt-size-chart")) {
+          initRLFitGuide(standalone);
+        }
+
+        // Expose globally so Monetate can call manually if needed
+        window.initRLFitGuide = initRLFitGuide;
+      })();
     </script>
   </body>
 </html>
